@@ -1,28 +1,44 @@
 import React, { useMemo } from 'react'
-import { useTable } from 'react-table'
+import { useTable, useGlobalFilter, useFilters } from 'react-table'
 import MOCK_DATA from './MOCK_DATA.json'
 import { COLUMNS, GROUPED_COLUMNS } from './columns'
 import './table.css'
+import GlobalFilter from './GlobalFilter'
+import ColumnFilter from './ColumnFilter'
 
 
-export const BasicTable = () => {
+
+export const FilteringTable = () => {
 
     const columns = useMemo(() => COLUMNS, [])
     const data = useMemo(() => MOCK_DATA, [])
 
+    const defaultColumn = useMemo(() => {
+        return {
+            Filter: ColumnFilter
+        }
+    }, [])
     const {
         getTableProps, 
         getTableBodyProps,
         headerGroups,
         footerGroups,
         rows,
-        prepareRow
+        prepareRow,
+        state,
+        setGlobalFilter,
     } = useTable({
         columns,
-        data
-    })
+        data,
+        defaultColumn
+    }, 
+    useFilters,
+    useGlobalFilter)
 
+    const { globalFilter } = state
   return (
+      <>
+        <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter}/>
     <table {...getTableProps()}>
         <thead>
             {
@@ -32,6 +48,7 @@ export const BasicTable = () => {
                                 headerGroup.headers.map( column => (
                                     <th {...column.getHeaderProps()}>
                                         {column.render("Header")}
+                                        <div>{column.canFilter ? column.render('Filter') : null}</div>
                                     </th>
                                 ))
                             }
@@ -78,5 +95,6 @@ export const BasicTable = () => {
             }
         </tfoot>
     </table>
+  </>
   )
 }
